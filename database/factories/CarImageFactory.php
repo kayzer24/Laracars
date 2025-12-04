@@ -18,7 +18,7 @@ class CarImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'image_path' => fake()->imageUrl(),
+            'image_path' => "https://im.qccdn.fr/node/actualite-toyota-yaris-hybride-2020-premieres-impressions-82255/thumbnail_800x480px-136078.jpg",
             'position' => function (array $attr) {
                 return Car::find($attr['car_id'])->images->count() + 1;
             },

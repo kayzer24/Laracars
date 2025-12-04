@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Car;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -13,7 +14,14 @@ class CarController extends Controller
      */
     public function index(): View
     {
-        $cars = Car::where('published_at', '!=', null)
+        // $cars = Car::where('published_at', '!=', null)
+        // ->paginate(15);
+
+        // todo change when auth system in place
+        $cars = User::findOrFail(4)
+            ->cars()
+            ->with(['primaryImage', 'maker', 'model'])
+            ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return view('car.index', [
@@ -42,7 +50,7 @@ class CarController extends Controller
      */
     public function show(Car $car): View
     {
-        return view('car.show');
+        return view('car.show', ['car' => $car]);
     }
 
     /**
@@ -71,6 +79,33 @@ class CarController extends Controller
 
     public function search(): View
     {
-        return view('car.search');
+        $query = Car::where('published_at', '<', now())
+            ->with(['primaryImage', 'city', 'carType', 'fuelType', 'maker', 'model'])
+            ->orderBy('published_at', 'desc');
+
+//        $query->join('cities', 'cities.id', '=', 'cars.city_id')
+//            ->join('car_types', 'car_types.id', '=', 'cars.car_type_id')
+//            ->where('cities.state_id', 3)
+//            ->where('car_types.name', 'Sedan');
+
+        //        $query->select('cars.*', 'cities.name as city_name');
+
+//        $carCount = $query->count();
+//        $cars = $query->limit(30)->get();
+
+        $cars = $query->paginate(15);
+
+        return view('car.search', ['cars' => $cars]);
+    }
+
+    public function watchlist(): View
+    {
+        // todo change when auth system in place
+        $cars = User::findOrFail(5)
+            ->favouriteCars()
+            ->with(['primaryImage', 'city', 'carType', 'fuelType', 'maker', 'model'])
+            ->paginate(12);
+
+        return view('car.watchlist', ['cars' => $cars]);
     }
 }
